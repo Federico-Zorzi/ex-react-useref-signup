@@ -60,3 +60,9 @@ h1 {
   font-size: 1rem;
   cursor: pointer;
 }
+
+.error-message-validation {
+  margin-top: 0.3rem;
+  color: red;
+  font-size: 1rem;
+}
