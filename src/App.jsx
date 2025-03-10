@@ -11,10 +11,10 @@ function App() {
     description: "",
   };
   const initValidationForm = {
-    validFullname: true,
-    validUsername: true,
-    validPassword: true,
-    validExperience: true,
+    isValidFullname: true,
+    isValidUsername: true,
+    isValidPassword: true,
+    isValidExperience: true,
   };
 
   const [studentFormData, setStudentFormData] = useState(initValueStudentForm);
@@ -31,33 +31,23 @@ function App() {
     let isValid = true;
     let updateValidation = { ...validationStudentForm };
 
-    if (!studentFormData.fullname.trim()) {
-      isValid = false;
-      updateValidation.validFullname = false;
-    }
-
-    if (!studentFormData.username.trim()) {
-      isValid = false;
-      updateValidation.validUsername = false;
-    }
-
-    if (!studentFormData.password.trim()) {
-      isValid = false;
-      updateValidation.validPassword = false;
-    }
-
-    if (studentFormData.experience < 0) {
-      isValid = false;
-      updateValidation.validExperience = false;
-    }
+    updateValidation.isValidFullname = studentFormData.fullname.trim();
+    updateValidation.isValidUsername = studentFormData.username.trim();
+    updateValidation.isValidPassword = studentFormData.password.trim();
+    updateValidation.isValidExperience = studentFormData.experience >= 0;
 
     setValidationStudentForm(updateValidation);
 
-    if (!isValid) return;
-
-    console.log("Inviato", studentFormData);
-    setStudentFormData(initValueStudentForm);
-    setValidationStudentForm(initValidationForm);
+    if (
+      updateValidation.isValidFullname &&
+      updateValidation.isValidUsername &&
+      updateValidation.isValidPassword &&
+      updateValidation.isValidExperience
+    ) {
+      console.log("Inviato", studentFormData);
+      setStudentFormData(initValueStudentForm);
+      setValidationStudentForm(initValidationForm);
+    }
   };
 
   return (
@@ -79,7 +69,7 @@ function App() {
                 onChange={handleInputChange}
                 required
               />
-              {!validationStudentForm.validFullname && (
+              {!validationStudentForm.isValidFullname && (
                 <p className="error-message-validation">
                   Il nome inserito non è valido
                 </p>
@@ -98,7 +88,7 @@ function App() {
                 onChange={handleInputChange}
                 required
               />
-              {!validationStudentForm.validUsername && (
+              {!validationStudentForm.isValidUsername && (
                 <p className="error-message-validation">
                   L'username non è valido
                 </p>
@@ -120,7 +110,7 @@ function App() {
                 onChange={handleInputChange}
                 required
               />
-              {!validationStudentForm.validPassword && (
+              {!validationStudentForm.isValidPassword && (
                 <p className="error-message-validation">
                   La password inserita non è valida
                 </p>
@@ -139,7 +129,7 @@ function App() {
                 onChange={handleInputChange}
                 required
               />
-              {!validationStudentForm.validExperience && (
+              {!validationStudentForm.isValidExperience && (
                 <p className="error-message-validation">
                   Gli anni di esperienza devono essere maggiori o uguali a 0
                 </p>
