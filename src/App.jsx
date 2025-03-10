@@ -1,52 +1,99 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 function App() {
+  /* console.log("Render"); */
+
   const specializationsList = ["Full Stack", "Frontend", "Backend"];
   const initValueStudentForm = {
-    fullname: "",
     username: "",
     password: "",
     specialization: "",
-    experience: 0,
-    description: "",
   };
   const initValidationForm = {
-    isValidFullname: true,
-    isValidUsername: true,
-    isValidPassword: true,
-    isValidExperience: true,
+    isValidFullname: false,
+    isValidUsername: false,
+    isValidPassword: false,
+    isValidExperience: false,
+    isValidDescription: false,
   };
 
+  const fullname = useRef("");
+  const experience = useRef(null);
+  const description = useRef("");
+
+  const [isChecked, setIsChecked] = useState(false);
   const [studentFormData, setStudentFormData] = useState(initValueStudentForm);
   const [validationStudentForm, setValidationStudentForm] =
     useState(initValidationForm);
-  /* console.log(validationStudentForm); */
 
   const handleInputChange = (e) => {
-    setStudentFormData({ ...studentFormData, [e.target.name]: e.target.value });
+    const letters = /[a-zA-Z]/;
+    const numbers = /[0-9]/;
+    const symbols = /[!@#$%^&*()\-=+\[\]{}|;:'"\\,.<>?/`~]/;
+    /* console.log(e.target.name, e.target.value); */
+
+    let inputValue = e.target.value;
+
+    setValidationStudentForm((currVal) => {
+      let updateValidation = { ...validationStudentForm };
+      if (e.target.name === "username") {
+        updateValidation.isValidUsername =
+          inputValue.trim().length >= 6 || inputValue.trim().length === 0;
+      }
+
+      if (e.target.name === "password") {
+        updateValidation.isValidPassword =
+          (letters.test(inputValue) &&
+            numbers.test(inputValue) &&
+            symbols.test(inputValue) &&
+            inputValue.trim().length >= 8) ||
+          inputValue.trim().length === 0;
+      }
+
+      return updateValidation;
+    });
+
+    setStudentFormData((currVal) => ({
+      ...currVal,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    let isValid = true;
+    /* console.log("validationStudentForm", validationStudentForm); */
+    /* console.log("fullname.current", fullname.current.value); */
+
     let updateValidation = { ...validationStudentForm };
-
-    updateValidation.isValidFullname = studentFormData.fullname.trim();
-    updateValidation.isValidUsername = studentFormData.username.trim();
-    updateValidation.isValidPassword = studentFormData.password.trim();
-    updateValidation.isValidExperience = studentFormData.experience >= 0;
-
+    updateValidation.isValidFullname = fullname.current.value.trim().length > 0;
+    updateValidation.isValidExperience = experience.current.value >= 0;
+    updateValidation.isValidDescription =
+      description.current.value.length >= 100 &&
+      description.current.value.length <= 1000;
     setValidationStudentForm(updateValidation);
+    setIsChecked(true);
 
     if (
       updateValidation.isValidFullname &&
       updateValidation.isValidUsername &&
       updateValidation.isValidPassword &&
-      updateValidation.isValidExperience
+      updateValidation.isValidExperience &&
+      updateValidation.isValidDescription
     ) {
-      console.log("Inviato", studentFormData);
+      console.log("Dati inviati: ", {
+        ...studentFormData,
+        fullname: fullname.current.value,
+        experience: experience.current.value,
+        description: description.current.value,
+      });
+
+      fullname.current.value = "";
+      experience.current.value = "";
+      description.current.value = "";
+
       setStudentFormData(initValueStudentForm);
       setValidationStudentForm(initValidationForm);
+      setIsChecked(false);
     }
   };
 
@@ -63,17 +110,23 @@ function App() {
               <input
                 id="fullname"
                 type="text"
+                ref={fullname}
                 placeholder="Inserisci nome completo..."
-                name="fullname"
-                value={studentFormData.fullname}
-                onChange={handleInputChange}
                 required
               />
-              {!validationStudentForm.isValidFullname && (
-                <p className="error-message-validation">
-                  Il nome inserito non è valido
-                </p>
-              )}
+              {isChecked &&
+              fullname.current &&
+              fullname.current.value.length > 0 ? (
+                validationStudentForm.isValidFullname ? (
+                  <p className="valid-message-validation">
+                    Nome inserito valido.
+                  </p>
+                ) : (
+                  <p className="error-message-validation">
+                    Il nome inserito non è valido.
+                  </p>
+                )
+              ) : null}
             </div>
 
             {/* USERNAME */}
@@ -88,11 +141,17 @@ function App() {
                 onChange={handleInputChange}
                 required
               />
-              {!validationStudentForm.isValidUsername && (
-                <p className="error-message-validation">
-                  L'username non è valido
-                </p>
-              )}
+              {studentFormData.username.length > 0 ? (
+                validationStudentForm.isValidUsername ? (
+                  <p className="valid-message-validation">
+                    Username inserito valido.
+                  </p>
+                ) : (
+                  <p className="error-message-validation">
+                    Inserisci un username di almeno 6 caratteri.
+                  </p>
+                )
+              ) : null}
             </div>
           </div>
 
@@ -110,11 +169,19 @@ function App() {
                 onChange={handleInputChange}
                 required
               />
-              {!validationStudentForm.isValidPassword && (
-                <p className="error-message-validation">
-                  La password inserita non è valida
-                </p>
-              )}
+
+              {studentFormData.password.length > 0 ? (
+                validationStudentForm.isValidPassword ? (
+                  <p className="valid-message-validation">
+                    Password inserita valida.
+                  </p>
+                ) : (
+                  <p className="error-message-validation">
+                    La password inserita deve contenere almeno 8 caratteri, 1
+                    lettera, 1 numero e 1 simbolo.
+                  </p>
+                )
+              ) : null}
             </div>
 
             {/* EXPERIENCE YEARS */}
@@ -124,16 +191,20 @@ function App() {
                 id="experience"
                 type="number"
                 placeholder="Inserisci gli anni di esperienza..."
-                name="experience"
-                value={studentFormData.experience}
-                onChange={handleInputChange}
+                ref={experience}
                 required
               />
-              {!validationStudentForm.isValidExperience && (
-                <p className="error-message-validation">
-                  Gli anni di esperienza devono essere maggiori o uguali a 0
-                </p>
-              )}
+              {isChecked ? (
+                experience.current && experience.current.value > 0 ? (
+                  <p className="valid-message-validation">
+                    Anni di esperienza inseriti validi.
+                  </p>
+                ) : (
+                  <p className="error-message-validation">
+                    Gli anni di esperienza devono essere maggiori o uguali a 0.
+                  </p>
+                )
+              ) : null}
             </div>
           </div>
 
@@ -167,9 +238,22 @@ function App() {
                 id="description"
                 placeholder="Inserisci una tua personale descrizione..."
                 name="description"
-                value={studentFormData.description}
-                onChange={handleInputChange}
+                ref={description}
               />
+
+              {isChecked &&
+              description.current &&
+              description.current.value.length > 0 ? (
+                validationStudentForm.isValidDescription ? (
+                  <p className="valid-message-validation">
+                    Descrizione inserita valida.
+                  </p>
+                ) : (
+                  <p className="error-message-validation">
+                    La descrizione deve contenere tra i 100 e i 1000 caratteri
+                  </p>
+                )
+              ) : null}
             </div>
           </div>
 

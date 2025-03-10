@@ -61,8 +61,16 @@ h1 {
   cursor: pointer;
 }
 
-.error-message-validation {
+.error-message-validation,
+.valid-message-validation {
   margin-top: 0.3rem;
-  color: red;
   font-size: 1rem;
+}
+
+.error-message-validation {
+  color: red;
+}
+
+.valid-message-validation {
+  color: green;
 }
