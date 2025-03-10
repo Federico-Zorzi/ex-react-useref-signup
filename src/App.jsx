@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function App() {
   /* console.log("Render"); */
@@ -87,6 +87,7 @@ function App() {
         description: description.current.value,
       });
 
+      /* reset form data */
       fullname.current.value = "";
       experience.current.value = "";
       description.current.value = "";
@@ -96,6 +97,20 @@ function App() {
       setIsChecked(false);
     }
   };
+
+  const handleReset = () => {
+    /* reset form data */
+    fullname.current.value = "";
+    experience.current.value = null;
+    description.current.value = "";
+    setStudentFormData(initValueStudentForm);
+    setValidationStudentForm(initValidationForm);
+    setIsChecked(false);
+  };
+
+  useEffect(() => {
+    fullname.current.focus();
+  }, []);
 
   return (
     <main>
@@ -258,13 +273,28 @@ function App() {
           </div>
 
           {/* SUBMIT BUTTON */}
-          <div>
+          <div id="form-buttons">
             <button id="form-button" type="submit">
               Invia
+            </button>
+            <button id="form-button" type="button" onClick={handleReset}>
+              Reset Form
             </button>
           </div>
         </form>
       </section>
+
+      <div id="arrow-return-container">
+        <button
+          id="arrow-return"
+          onClick={() => {
+            fullname.current.focus();
+            fullname.current.scrollIntoView({ behavior: "smooth" });
+          }}
+        >
+          <i className="fa-solid fa-arrow-up fa-2xl"></i>
+        </button>
+      </div>
     </main>
   );
 }
